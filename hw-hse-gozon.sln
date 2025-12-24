@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiGateway", "ApiGateway\ApiGateway.csproj", "{4D4147D8-0759-4884-BFC1-15120A29086A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrdersService", "OrdersService\OrdersService.csproj", "{8983506D-5F85-4D66-B370-672C415EEC42}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentsService", "PaymentsService\PaymentsService.csproj", "{E3D9E1EC-3234-4E7E-B7AA-9FA4AABF4C4C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4D4147D8-0759-4884-BFC1-15120A29086A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D4147D8-0759-4884-BFC1-15120A29086A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D4147D8-0759-4884-BFC1-15120A29086A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D4147D8-0759-4884-BFC1-15120A29086A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8983506D-5F85-4D66-B370-672C415EEC42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8983506D-5F85-4D66-B370-672C415EEC42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8983506D-5F85-4D66-B370-672C415EEC42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8983506D-5F85-4D66-B370-672C415EEC42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3D9E1EC-3234-4E7E-B7AA-9FA4AABF4C4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3D9E1EC-3234-4E7E-B7AA-9FA4AABF4C4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3D9E1EC-3234-4E7E-B7AA-9FA4AABF4C4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3D9E1EC-3234-4E7E-B7AA-9FA4AABF4C4C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Gozon Client</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .box { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 8px; max-width: 400px; }
+        .notification { padding: 10px; margin-top: 5px; border-radius: 4px; color: white; }
+        .success { background-color: #28a745; }
+        .error { background-color: #dc3545; }
+        .info { background-color: #007bff; }
+    </style>
+</head>
+<body>
+    <h1>Gozon: Статус заказа</h1>
+
+    <div class="box">
+        <h3>Подписка на обновления</h3>
+        <p>Введите ID заказа, чтобы следить за ним:</p>
+        <input type="text" id="orderId" placeholder="Guid заказа (a249...)" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+        <button onclick="subscribe()" style="padding: 10px 20px; cursor: pointer;">Подписаться</button>
+    </div>
+
+    <div id="statusArea"></div>
+
+    <script>
+        if ("Notification" in window && Notification.permission === "default") {
+            Notification.requestPermission();
+        }
+
+        function showLog(html, type) {
+            const div = document.createElement("div");
+            div.className = `notification ${type}`;
+            div.innerHTML = html;
+            const area = document.getElementById("statusArea");
+            if (area) area.prepend(div);
+            console.log(type + ": " + html.replace(/<br>/g, " "));
+        }
+
+        if (!window.signalR) {
+            showLog("SignalR не загрузился (window.signalR == null). Проверь URL в <script src=...>", "error");
+            throw new Error("SignalR не загрузился");
+        }
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("http://localhost:5050/hubs/orders")
+            .withAutomaticReconnect()
+            .build();
+
+
+        connection.on("OrderUpdated", (data) => {
+            let color = "info";
+            let text = `Статус: ${data.status}`;
+
+            if (data.status == 2 || data.status === "Finished") {
+                color = "success"; 
+                text = "Оплата прошла успешно!";
+            } else if (data.status == 3 || data.status === "Cancelled") {
+                color = "error";
+                text = `Оплата отменена. Причина: ${data.reason}`;
+            }
+
+            showLog(`Заказ ${data.orderId ? data.orderId.substring(0,8) : '???'}... <br> <b>${text}</b>`, color);
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("Gozon: заказ обновлён", {
+                    body: `Статус: ${data.status}`
+                });
+            }
+            alert(text.replace(/<br>/g, "\n"));
+        });
+
+        async function subscribe() {
+            const input = document.getElementById("orderId");
+            const oid = input.value;
+            
+            if (!oid) {
+                alert("Введите ID заказа!");
+                return;
+            }
+
+            try {
+                if (connection.state === signalR.HubConnectionState.Disconnected) {
+                    await connection.start();
+                    showLog("WebSocket подключен", "info");
+                }
+
+                await connection.invoke("JoinOrder", oid.trim());
+                showLog(`Подписались на заказ: ${oid}`, "info");
+
+            } catch (err) {
+                console.error(err);
+                showLog("Ошибка: " + err.toString(), "error");
+            }
+        }
+    </script>
+</body>
+</html>

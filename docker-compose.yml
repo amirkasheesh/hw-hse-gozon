@@ -1,0 +1,106 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=ordersdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ordersdb"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    networks:
+      - backend
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    networks:
+      - backend
+
+  orders-service:
+    build:
+      context: ./OrdersService
+      dockerfile: Dockerfile
+    container_name: orders-service
+    ports:
+      - "5001:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - backend
+
+  payments-service:
+    build:
+      context: ./PaymentsService
+      dockerfile: Dockerfile
+    container_name: payments-service
+    ports:
+      - "5002:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - backend
+
+  gateway:
+    build:
+      context: ./ApiGateway
+      dockerfile: Dockerfile
+    container_name: gateway
+    ports:
+      - "5050:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+
+      - ReverseProxy__Clusters__orders_cluster__Destinations__d1__Address=http://orders-service:8080/
+      - ReverseProxy__Clusters__payments_cluster__Destinations__d1__Address=http://payments-service:8080/
+    depends_on:
+      - orders-service
+      - payments-service
+    networks:
+      - backend
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:80"
+    networks:
+      - backend
+
+networks:
+  backend:
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
